@@ -1,0 +1,42 @@
+// Chatbot
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+
+#define MAX_PROMPT 1024
+
+int main() {
+    const char *api_key = ""; // Put your Gemini API key
+    const char *model = "gemini-2.5-pro";
+
+    char prompt[MAX_PROMPT];
+    char cmd[4096];
+
+    printf("Welcome to Gemini Chatbot! Type 'exit' to quit.\n\n");
+
+    while (1) {
+        printf("You: ");
+        fgets(prompt, MAX_PROMPT, stdin);
+        prompt[strcspn(prompt, "\n")] = 0; // remove newline
+
+        if (strcmp(prompt, "exit") == 0) {
+            printf("Exiting chatbot. Goodbye!\n");
+            break;
+        }
+
+        // Build curl command with PowerShell JSON extraction
+        snprintf(cmd, sizeof(cmd),
+            "curl -s -X POST \"https://generativelanguage.googleapis.com/v1beta/models/%s:generateContent?key=%s\" "
+            "-H \"Content-Type: application/json\" "
+            "-d \"{ \\\"contents\\\": [{ \\\"parts\\\":[{\\\"text\\\":\\\"%s\\\"}] }] }\" | "
+            "powershell -Command \"$input | ConvertFrom-Json | "
+            "ForEach-Object { $_.candidates[0].content.parts[0].text }\"",
+            model, api_key, prompt);
+
+        // Print only the AI reply
+        system(cmd);
+        printf("\n\n");
+    }
+
+    return 0;
+}
