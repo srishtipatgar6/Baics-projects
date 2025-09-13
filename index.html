@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Weather App 🌤</title>
+  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet">
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Roboto', sans-serif;
+      /* Cool misty/cloudy background image */
+      background: url('https://images.unsplash.com/photo-1506744038136-46273834b3fb?auto=format&fit=crop&w=1950&q=80') no-repeat center center fixed;
+      background-size: cover;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+    }
+
+    .container {
+      background: rgba(255, 255, 255, 0.85);
+      padding: 30px 40px;
+      border-radius: 20px;
+      text-align: center;
+      width: 350px;
+      box-shadow: 0 8px 20px rgba(0,0,0,0.3);
+      transition: transform 0.3s, box-shadow 0.3s;
+    }
+
+    .container:hover {
+      transform: translateY(-10px);
+      box-shadow: 0 12px 30px rgba(0,0,0,0.4);
+    }
+
+    h1 { font-size: 28px; margin-bottom: 20px; color: #333; }
+
+    input {
+      width: 80%;
+      padding: 12px;
+      margin-bottom: 15px;
+      border: 1px solid #ccc;
+      border-radius: 10px;
+      font-size: 16px;
+      outline: none;
+      text-align: center;
+      transition: all 0.3s;
+    }
+
+    input:focus {
+      border-color: #4facfe;
+      box-shadow: 0 0 8px rgba(79,172,254,0.5);
+    }
+
+    button {
+      padding: 12px 25px;
+      border: none;
+      border-radius: 10px;
+      background: linear-gradient(45deg, #4facfe, #00f2fe);
+      color: white;
+      font-size: 16px;
+      font-weight: bold;
+      cursor: pointer;
+      transition: transform 0.2s, box-shadow 0.2s;
+    }
+
+    button:hover {
+      transform: scale(1.05);
+      box-shadow: 0 6px 15px rgba(0,0,0,0.3);
+    }
+
+    .result { margin-top: 25px; text-align: center; }
+
+    .result h2 { margin-bottom: 10px; font-size: 24px; color: #444; }
+
+    .icon img { width: 80px; height: 80px; margin-bottom: 10px; }
+
+    .result p { margin: 5px 0; font-size: 16px; color: #555; }
+
+    .error { color: red; font-weight: bold; }
+
+    @media(max-width: 400px) {
+      .container { width: 90%; padding: 20px; }
+      h1 { font-size: 24px; }
+      input, button { width: 90%; }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>🌤 Weather App</h1>
+    <input type="text" id="cityInput" placeholder="Enter city name">
+    <button onclick="getWeather()">Get Weather</button>
+    <div class="result" id="result"></div>
+  </div>
+
+  <script>
+    const API_KEY = "263c52f01b0c43e6b1952557251309"; // your WeatherAPI key
+
+    async function getWeather() {
+      const city = document.getElementById("cityInput").value.trim();
+      const resultDiv = document.getElementById("result");
+      resultDiv.innerHTML = "";
+
+      if (!city) {
+        resultDiv.innerHTML = "<p class='error'>Please enter a city name.</p>";
+        return;
+      }
+
+      try {
+        const url = `https://api.weatherapi.com/v1/current.json?key=${API_KEY}&q=${encodeURIComponent(city)}&aqi=no`;
+        const response = await fetch(url);
+        const data = await response.json();
+
+        if (data.error) {
+          resultDiv.innerHTML = `<p class='error'>❌ ${data.error.message}</p>`;
+          return;
+        }
+
+        const loc = data.location;
+        const cur = data.current;
+
+        resultDiv.innerHTML = `
+          <h2>${loc.name}, ${loc.country}</h2>
+          <div class="icon">
+            <img src="${cur.condition.icon}" alt="${cur.condition.text}">
+          </div>
+          <p>🌡 Temperature: ${cur.temp_c}°C</p>
+          <p>Feels Like: ${cur.feelslike_c}°C</p>
+          <p>💧 Humidity: ${cur.humidity}%</p>
+          <p>☁️ Condition: ${cur.condition.text}</p>
+          <p>🌬 Wind: ${cur.wind_kph} km/h</p>
+        `;
+      } catch (err) {
+        resultDiv.innerHTML = "<p class='error'>⚠️ Error fetching data.</p>";
+      }
+    }
+  </script>
+</body>
+</html>
